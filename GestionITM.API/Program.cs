@@ -14,10 +14,11 @@ builder.Services.AddSwaggerGen();
 // 1. Configurar la cadena de conexión
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+     
 // 2. Registrar el Repositorio (Inyección de Dependencias)
 // AddScoped significa: "Crea una instancia por cada petición HTTP"
 builder.Services.AddScoped<IEstudianteRepository, EstudianteRepository>();
+builder.Services.AddScoped<ICursoRepository, CursoRepository>();
 
 var app = builder.Build();
 
@@ -31,3 +32,6 @@ if (app.Environment.IsDevelopment())
 app.MapControllers();
 
 app.Run();
+
+
+
