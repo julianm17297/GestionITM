@@ -1,6 +1,10 @@
+using AutoMapper;
+using GestionITM.API.Mappings;
+using GestionITM.API.Middleware;
 using GestionITM.Domain.Interfaces;
 using GestionITM.Infrastructure;
 using GestionITM.Infrastructure.Repositories;
+using GestionITM.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,10 +22,17 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // 2. Registrar el Repositorio (Inyección de Dependencias)
 // AddScoped significa: "Crea una instancia por cada petición HTTP"
 builder.Services.AddScoped<IEstudianteRepository, EstudianteRepository>();
+builder.Services.AddScoped<IEstudianteService, EstudianteService>();
+builder.Services.AddScoped<ICursoRepository, CursoRepository>();
+
+// AutoMapper
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseMiddleware<ExceptionMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -31,3 +42,4 @@ if (app.Environment.IsDevelopment())
 app.MapControllers();
 
 app.Run();
+
