@@ -128,3 +128,5 @@ ConflictException → HTTP 409
 * SQL Server
 * Swagger
 * Clean Architecture
+
+# Agregamos pipelines de CI/CD para despliegue automático a Azure App Service.
