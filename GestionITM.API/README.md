@@ -1,140 +1,130 @@
-# GestionITM.API
+# Gestión ITM – Módulo Profesores
 
-Proyecto ASP.NET Core Web API en .NET 8 para la gestión académica del ITM (estudiantes, matrículas, cursos, etc.).
+## Asignatura
 
-## Descripción
+Programación de Software
 
-`GestionITM.API` es la capa de presentación que expone la funcionalidad del sistema académico a través de endpoints HTTP/REST.
+## Objetivo del Taller
 
-- Framework: ASP.NET Core Web API (.NET 8).
-- Características destacadas:
-  - Swagger/OpenAPI para documentación de la API.
-  - Soporte para controladores y endpoints minimal API (según se implemente).
+Implementar el ciclo de vida completo de una entidad utilizando *Arquitectura N-Capas (Clean Architecture)* aplicando:
 
-## Dependencias
+* DTOs
+* Servicios
+* Repositorios
+* Middleware global de excepciones
+* AutoMapper
 
-- `GestionITM.Domain` – Entidades de dominio y lógica de negocio.
-- `GestionITM.Infrastructure` – Acceso a datos y servicios externos.
+---
 
-## Ejecución
+# Arquitectura del Proyecto
 
-Desde la carpeta raíz del proyecto API:
+El proyecto sigue el patrón *Clean Architecture* dividido en capas:
 
-```bash
-dotnet run
-```
+GestionITM.API → Controladores, Middleware
+GestionITM.Domain → Entidades, DTOs, Interfaces, Exceptions
+GestionITM.Infrastructure → Repositorios, Servicios, Acceso a datos
 
-O desde la raíz de la solución:
+Flujo de la aplicación:
 
-```bash
-dotnet run --project GestionITM.API/GestionITM.API.csproj
-```
+Cliente → Controller → Service → Repository → Base de datos
 
-## Configuración
+---
 
-- `appsettings.json` – Configuración general (cadena de conexión, logging, etc.).
-- `appsettings.Development.json` – Configuración específica del entorno de desarrollo.
+# Entidad Implementada
 
-## Desarrollo
+Profesor
 
-- Agregar controladores en la carpeta `Controllers` (por ejemplo, `EstudiantesController`, `CursosController`).
-- Usar inyección de dependencias para registrar servicios de `Domain` e `Infrastructure` relacionados con estudiantes, matrículas y cursos.
+Campos:
 
-### Ejemplo de `EstudiantesController` (CRUD básico)
+* Id
+* Nombre (requerido, máximo 100 caracteres)
+* Especialidad
+* Email (requerido)
+* FechaContratacion
 
-Ejemplo simplificado de controlador para gestionar estudiantes usando `ApplicationDbContext`:
+---
 
-```csharp
-using GestionITM.Domain.Entities;
-using GestionITM.Infrastructure;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+# DTOs
 
-namespace GestionITM.API.Controllers
-{
-    [ApiController]
-    [Route("api/[controller]")]
-    public class EstudiantesController : ControllerBase
-    {
-        private readonly ApplicationDbContext _context;
+Se implementaron DTOs para separar la lógica de dominio de la exposición de datos.
 
-        public EstudiantesController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+ProfesorDto
+Usado para lectura de datos.
+No expone el campo *FechaContratacion*.
 
-        // GET: api/Estudiantes
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Estudiante>>> GetEstudiantes()
-        {
-            return await _context.Estudiantes.AsNoTracking().ToListAsync();
-        }
+ProfesorCreateDto
+Usado para registrar nuevos profesores.
 
-        // GET: api/Estudiantes/5
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<Estudiante>> GetEstudiante(int id)
-        {
-            var estudiante = await _context.Estudiantes.FindAsync(id);
-            if (estudiante is null)
-            {
-                return NotFound();
-            }
+---
 
-            return estudiante;
-        }
+# Reglas de Negocio
 
-        // POST: api/Estudiantes
-        [HttpPost]
-        public async Task<ActionResult<Estudiante>> CreateEstudiante(Estudiante estudiante)
-        {
-            _context.Estudiantes.Add(estudiante);
-            await _context.SaveChangesAsync();
+Durante el registro de profesores se aplican las siguientes validaciones:
 
-            return CreatedAtAction(nameof(GetEstudiante), new { id = estudiante.Id }, estudiante);
-        }
+* La especialidad no puede estar vacía.
+* Si la especialidad es *Arquitectura* se registra en consola:
 
-        // PUT: api/Estudiantes/5
-        [HttpPut("{id:int}")]
-        public async Task<IActionResult> UpdateEstudiante(int id, Estudiante estudiante)
-        {
-            if (id != estudiante.Id)
-            {
-                return BadRequest();
-            }
+Perfil Senior Detectado
 
-            _context.Entry(estudiante).State = EntityState.Modified;
+* Si el nombre del profesor es *Error* se genera una excepción controlada.
 
-            await _context.SaveChangesAsync();
+---
 
-            return NoContent();
-        }
+# Middleware Global de Excepciones
 
-        // DELETE: api/Estudiantes/5
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> DeleteEstudiante(int id)
-        {
-            var estudiante = await _context.Estudiantes.FindAsync(id);
-            if (estudiante is null)
-            {
-                return NotFound();
-            }
+Se implementó un *ExceptionMiddleware* que captura errores en toda la API y devuelve una respuesta JSON estandarizada.
 
-            _context.Estudiantes.Remove(estudiante);
-            await _context.SaveChangesAsync();
+También se crearon excepciones personalizadas:
 
-            return NoContent();
-        }
-    }
-}
-```
+BadRequestException
+NotFoundException
+ConflictException
+UnauthorizedException
 
-## Documentación de la API
+---
 
-Swagger se configura a través de los paquetes:
+# Manejo de Errores
 
-- `Microsoft.AspNetCore.OpenApi`
-- `Swashbuckle.AspNetCore`
+| Error                  | Código HTTP |
+| ---------------------- | ----------- |
+| Especialidad vacía     | 400         |
+| Error de prueba        | 400         |
+| Profesor no encontrado | 404         |
+| Email duplicado        | 409         |
 
-Al ejecutar la API, la interfaz de Swagger suele estar disponible en una ruta similar a:
+---
 
-- `https://localhost:<puerto>/swagger`
+# Capturas de Evidencia
+
+## Tabla en SQL Server
+
+(Insertar captura de la tabla Profesor creada)
+
+## Registro exitoso en Swagger
+
+(Insertar captura del POST funcionando)
+
+## Manejo de errores por Middleware
+
+(Insertar captura mostrando el mensaje *Error de prueba*)
+
+---
+
+# Bonus Implementado
+
+Se agregó validación para evitar registrar profesores con el *mismo email*.
+
+En caso de duplicado se lanza:
+
+ConflictException → HTTP 409
+
+---
+
+# Tecnologías utilizadas
+
+* ASP.NET Core 8
+* Entity Framework Core
+* AutoMapper
+* SQL Server
+* Swagger
+* Clean Architecture

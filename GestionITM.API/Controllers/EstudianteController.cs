@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using GestionITM.Domain.Interfaces;
 using GestionITM.Domain.Dtos;
-
+using Microsoft.AspNetCore.Authorization;
 
 namespace GestionITM.API.Controllers
 {
+    [Authorize] // El candado (error 401); nadie entra a este controladdor
+    
     [Route("api/[controller]")]
     [ApiController]
     public class EstudianteController : ControllerBase

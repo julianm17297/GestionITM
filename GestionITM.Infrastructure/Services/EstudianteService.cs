@@ -10,7 +10,7 @@ using GestionITM.Domain.Interfaces;
 
 
 namespace GestionITM.Infrastructure.Services
-{
+{ 
     public class EstudianteService : IEstudianteService
     {
         private readonly IEstudianteRepository _repository;

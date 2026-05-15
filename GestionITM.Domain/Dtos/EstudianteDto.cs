@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace GestionITM.Domain.Dtos
 {
+
     public class EstudianteDto
     {
         public int Id { get; set; }

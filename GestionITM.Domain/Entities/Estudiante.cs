@@ -17,10 +17,11 @@ namespace GestionITM.Domain.Entities
 
         public DateTime FechaInscripcion { get; set; } = DateTime.Now;
 
-        //Nuevo campo para el telefono del estudiante
-        // practica migracion: EFCore
+        // Nuevo campo para el número de teléfono del estudiante
+        // Práctica Migración EFCore
         [MaxLength(20)]
         public string Telefono { get; set; } = string.Empty;
+
 
     }
 }
