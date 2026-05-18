@@ -1,23 +1,33 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GestionITM.Domain.Entities
 {
     public class Matricula
     {
+        [Key]
         public int Id { get; set; }
 
-        // Relación con Estudiante
+        [Required]
         public int EstudianteId { get; set; }
 
-        // Relación con Curso
+        [Required]
         public int CursoId { get; set; }
 
         [Required]
         [MaxLength(20)]
         public string Periodo { get; set; } = string.Empty; // Ej: 2026-1
 
-        // Estado de la matrícula (por ejemplo: Activa, Cancelada, Finalizada)
         [MaxLength(20)]
-        public string Estado { get; set; } = string.Empty;
+        public string Estado { get; set; } = "Activa";
+
+        public DateTime FechaMatricula { get; set; } = DateTime.Now;
+
+        // Propiedades de navegación (Clave para que EF reconozca las relaciones)
+        [ForeignKey("EstudianteId")]
+        public virtual Estudiante Estudiante { get; set; } = null!;
+
+        [ForeignKey("CursoId")]
+        public virtual Curso Curso { get; set; } = null!;
     }
 }

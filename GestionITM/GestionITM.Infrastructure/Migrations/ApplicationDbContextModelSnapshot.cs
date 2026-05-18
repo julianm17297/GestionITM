@@ -38,6 +38,9 @@ namespace GestionITM.Infrastructure.Migrations
                     b.Property<int>("Creditos")
                         .HasColumnType("int");
 
+                    b.Property<int>("Cupos")
+                        .HasColumnType("int");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -98,12 +101,19 @@ namespace GestionITM.Infrastructure.Migrations
                     b.Property<int>("EstudianteId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("FechaMatricula")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Periodo")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CursoId");
+
+                    b.HasIndex("EstudianteId");
 
                     b.ToTable("Matriculas");
                 });
@@ -147,22 +157,44 @@ namespace GestionITM.Infrastructure.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Especialidad")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("FechaContratacion")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Profesores");
+                });
+
+            modelBuilder.Entity("GestionITM.Domain.Entities.Matricula", b =>
+                {
+                    b.HasOne("GestionITM.Domain.Entities.Curso", "Curso")
+                        .WithMany()
+                        .HasForeignKey("CursoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GestionITM.Domain.Entities.Estudiante", "Estudiante")
+                        .WithMany()
+                        .HasForeignKey("EstudianteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Curso");
+
+                    b.Navigation("Estudiante");
                 });
 #pragma warning restore 612, 618
         }

@@ -21,5 +21,6 @@ namespace GestionITM.Infrastructure
         public DbSet<Matricula> Matriculas { get; set; }
 
         public DbSet<Profesor> Profesores { get; set; }
+
     }
 }

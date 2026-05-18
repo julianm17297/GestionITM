@@ -10,6 +10,7 @@ using GestionITM.Domain.Dtos;
 using GestionITM.Infrastructure.Services;
 using AutoMapper;
 using GestionITM.Domain.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace GestionITM.Tests
 {
@@ -25,6 +26,7 @@ namespace GestionITM.Tests
             // Esta es la razón por la que creamos IProfesorRepository: para poder simular su comportamiento sin depender de la base de datos real
             var mockRepository = new Mock<IProfesorRepository>();
             var mockMapper = new Mock<IMapper>();
+            var mockLogger = new Mock<ILogger<ProfesorService>>();
 
             // Configuramos el mapper para devolver un Profesor cualquiera cuando reciba un ProfesorCreateDto
             mockMapper
@@ -32,7 +34,7 @@ namespace GestionITM.Tests
                 .Returns(new Profesor());
 
             // Instanciamos el servicio REAL, pero le inyectamos los mocks en lugar de las implementaciones reales
-            var profesorService = new ProfesorService(mockRepository.Object, mockMapper.Object);
+            var profesorService = new ProfesorService(mockRepository.Object, mockMapper.Object, mockLogger.Object);
 
             // Preparamos unos datos errados a propósito para probar la validación
 
@@ -49,23 +51,24 @@ namespace GestionITM.Tests
             // Exigimos (Assert) que al ejecutar (Act) el método,el sistema DEBE lanzar un error.
             // En esta implementación, cuando la especialidad está vacía el servicio devuelve false
             // y no lanza excepción. Probamos ese comportamiento explícitamente.
-            var resultado = await profesorService.RegistrarProfesorAsync(dtomalo);
-            Assert.False(resultado);
+            var exepcion = await Assert.ThrowsAsync<Exception>(() => profesorService.RegistrarProfesorAsync(dtomalo));
+            Assert.Equal(" especialidad vacía", exepcion.Message);
         }
 
-        // Prueba 2 : El camino feliz (Validar que funcione cuando debe funcionar)
-        [Fact]
+            // Prueba 2 : El camino feliz (Validar que funcione cuando debe funcionar)
+            [Fact]
         public async Task RegistrarProfesor_DatosCorrectos_DebeLllamarAlRepositorio()
         {
             // 1. Arrange
             var mockRepository = new Mock<IProfesorRepository>();
             var mockMapper = new Mock<IMapper>();
+            var mockLogger = new Mock<ILogger<ProfesorService>>();
 
             mockMapper
                 .Setup(m => m.Map<Profesor>(It.IsAny<ProfesorCreateDto>()))
                 .Returns(new Profesor());
 
-            var profesorService = new ProfesorService(mockRepository.Object, mockMapper.Object);
+            var profesorService = new ProfesorService(mockRepository.Object, mockMapper.Object, mockLogger.Object);
             var dtobien = new ProfesorCreateDto
             {
                 Nombre = "Ana",
